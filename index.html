@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wire Check</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@400;600;700&display=swap">
+<style>
+/* Layout: a wire-service desk — a slug line, one bulletin on perforated copy paper, a verdict form with a confidence stake, and the editor's correction slip. */
+:root {
+  --desk: #e9e7e1; --paper: #fbfaf6; --ink: #22252b; --muted: #555a64; --rule: #8c8f96;
+  --stamp: #8a5a00; --stamp-bg: #fff0cc; --good: #1e6a3c; --good-bg: #e3f1e8; --bad: #9a1d1d; --bad-bg: #f8e5e3; --focus: #2457c5; --btn: #22252b; --btn-ink: #fbfaf6;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace; --sans: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --desk: #15171b; --paper: #1f2228; --ink: #e9eaed; --muted: #b3b8c2; --rule: #6f7480;
+  --stamp: #f2c15a; --stamp-bg: #3a2f14; --good: #8cdcaa; --good-bg: #17301f; --bad: #ff9d96; --bad-bg: #3b1d1c; --focus: #8eb2ff; --btn: #e9eaed; --btn-ink: #15171b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --desk: #15171b; --paper: #1f2228; --ink: #e9eaed; --muted: #b3b8c2; --rule: #6f7480;
+  --stamp: #f2c15a; --stamp-bg: #3a2f14; --good: #8cdcaa; --good-bg: #17301f; --bad: #ff9d96; --bad-bg: #3b1d1c; --focus: #8eb2ff; --btn: #e9eaed; --btn-ink: #15171b; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--desk); color: var(--ink); font-family: var(--sans); font-size: 17px; line-height: 1.5 }
+.wrap { max-width: 740px; margin: 0 auto; padding-block: 24px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px }
+h1, h2, h3 { margin: 0; line-height: 1.15; text-wrap: balance }
+h1 { font-family: var(--mono); font-size: 2.2rem; letter-spacing: -0.01em }
+h2 { font-family: var(--mono); font-size: 1.25rem; font-weight: 600 }
+h3 { font-size: 1.3rem }
+p { margin: 0 } .muted { color: var(--muted) }
+.slug { font-family: var(--mono); font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; border-bottom: 1px dashed var(--rule); padding-bottom: 6px; font-variant-numeric: tabular-nums }
+.copy { background: var(--paper); border: 1px solid var(--rule); border-radius: 2px; padding: 18px 20px; display: grid; gap: 10px; background-image: radial-gradient(circle, var(--desk) 3px, transparent 3.5px); background-size: 18px 18px; background-repeat: repeat-y; background-position: 4px 6px; padding-left: 34px }
+.dateline { font-family: var(--mono); font-size: .9rem; color: var(--stamp); font-weight: 600; letter-spacing: .04em }
+.bulletin { font-family: var(--mono); font-size: 1.12rem; line-height: 1.55 }
+fieldset { border: 1px solid var(--rule); border-radius: 2px; padding: 12px 14px; margin: 0; display: grid; gap: 10px; background: var(--paper) }
+legend { font-weight: 700; padding: 0 6px }
+.choices { display: flex; flex-wrap: wrap; gap: 10px }
+.choice { position: relative }
+.choice input { position: absolute; opacity: 0; width: 1px; height: 1px }
+.choice label { display: inline-flex; align-items: center; min-height: 48px; padding: 10px 16px; border: 2px solid var(--rule); border-radius: 2px; cursor: pointer; font-weight: 600; background: var(--paper) }
+.choice input:checked + label { border-color: var(--ink); background: var(--stamp-bg) }
+.choice input:checked + label::before { content: "● "; margin-right: 4px }
+.choice input:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px }
+.choice input:disabled + label { cursor: default; opacity: .75 }
+button { font: inherit; cursor: pointer }
+.btn { min-height: 48px; padding: 10px 20px; border: 2px solid var(--btn); background: var(--btn); color: var(--btn-ink); font-family: var(--mono); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; border-radius: 2px; justify-self: start }
+.btn:disabled { opacity: .55; cursor: default }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px }
+h2:focus, h3:focus { outline: none } h2:focus-visible, h3:focus-visible { outline: 3px solid var(--focus) }
+.slip { border: 2px solid var(--rule); border-radius: 2px; padding: 14px 16px; display: grid; gap: 8px; background: var(--paper) }
+.slip.ok { border-color: var(--good); background: var(--good-bg) } .slip.no { border-color: var(--bad); background: var(--bad-bg) }
+.stampmark { display: inline-block; font-family: var(--mono); font-weight: 600; text-transform: uppercase; letter-spacing: .1em; border: 2px solid currentColor; padding: 2px 8px; transform: rotate(-2deg); justify-self: start }
+.ok .stampmark { color: var(--good) } .no .stampmark { color: var(--bad) }
+.src { font-family: var(--mono); font-size: .85rem; color: var(--muted) }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.hint { font-size: .9rem; color: var(--muted) }
+.table-wrap { overflow-x: auto }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; background: var(--paper) }
+caption { text-align: left; font-family: var(--mono); font-weight: 600; padding-bottom: 6px }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule) }
+.big { font-family: var(--mono); font-size: 3rem; line-height: 1; color: var(--stamp) }
+ul.plain { margin: 0; padding-left: 20px; display: grid; gap: 6px }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+.slip { animation: drop .25s ease-out }
+@keyframes drop { from { transform: translateY(-6px) } to { transform: none } }
+@media (prefers-reduced-motion: reduce) { .slip { animation: none } }
+</style>
+</head>
+<body>
+
+<main class="wrap">
+  <section id="start" aria-labelledby="t-start">
+    <div style="display:grid;gap:14px">
+      <p class="slug"><span>Module 11 · Verification desk</span><span>8 bulletins</span></p>
+      <h1 id="t-start" tabindex="-1">Wire Check</h1>
+      <p>Eight bulletins about AI in media, business, education, and government just came over the wire. Some are accurate. Some have been <strong>altered</strong>: one detail, like a number, a name, or an outcome, was changed. Before anything runs, you decide.</p>
+      <ul class="plain">
+        <li>Mark each bulletin <strong>Accurate</strong> or <strong>Altered</strong>.</li>
+        <li>Stake your confidence: 1 (a guess), 2 (fairly sure), or 3 (certain). Right adds your stake; wrong subtracts it.</li>
+        <li>Each round includes one accurate and one altered bulletin per sector, drawn from real Module 11 cases.</li>
+        <li>No timer. Keyboard: A or L for your verdict, 1–3 for your stake, Enter to file, N for the next bulletin.</li>
+      </ul>
+      <p class="muted" id="best-start"></p>
+      <button class="btn" id="go" type="button">Open the wire</button>
+    </div>
+  </section>
+
+  <section id="round" hidden aria-labelledby="t-round">
+    <div style="display:grid;gap:14px">
+      <p class="slug"><span id="r-count">Bulletin 1 of 8</span><span id="r-score">Points 0</span></p>
+      <h2 id="t-round" tabindex="-1">Bulletin 1</h2>
+      <article class="copy" aria-label="Bulletin text">
+        <p class="dateline" id="r-dateline"></p>
+        <p class="bulletin" id="r-text"></p>
+      </article>
+      <form id="form" style="display:grid;gap:12px">
+        <fieldset>
+          <legend>Your verdict</legend>
+          <div class="choices">
+            <span class="choice"><input type="radio" name="v" id="v-acc" value="true"><label for="v-acc">Accurate</label></span>
+            <span class="choice"><input type="radio" name="v" id="v-alt" value="altered"><label for="v-alt">Altered</label></span>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Your confidence stake</legend>
+          <div class="choices">
+            <span class="choice"><input type="radio" name="c" id="c1" value="1"><label for="c1">1 · A guess</label></span>
+            <span class="choice"><input type="radio" name="c" id="c2" value="2" checked><label for="c2">2 · Fairly sure</label></span>
+            <span class="choice"><input type="radio" name="c" id="c3" value="3"><label for="c3">3 · Certain</label></span>
+          </div>
+        </fieldset>
+        <div class="row"><button class="btn" id="file" type="submit">File verdict</button><span class="hint" id="need">Choose Accurate or Altered first.</span></div>
+      </form>
+      <div class="slip" id="fb" hidden>
+        <span class="stampmark" id="fb-stamp"></span>
+        <h3 id="t-fb" tabindex="-1"></h3>
+        <p id="fb-fact"></p>
+        <p class="src" id="fb-src"></p>
+        <div class="row"><button class="btn" id="next" type="button">Next bulletin</button><span class="hint">or press N</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="results" hidden aria-labelledby="t-res">
+    <div style="display:grid;gap:16px">
+      <p class="slug"><span>End of shift</span><span id="res-best"></span></p>
+      <h2 id="t-res" tabindex="-1">Your desk report</h2>
+      <p><span class="big" id="res-score"></span> <span class="muted">points out of a possible 24</span></p>
+      <div class="table-wrap"><table>
+        <caption>Results by sector</caption>
+        <thead><tr><th scope="col">Sector</th><th scope="col">Verdicts correct</th><th scope="col">Points</th></tr></thead>
+        <tbody id="res-rows"></tbody>
+      </table></div>
+      <div class="slip"><h3>Calibration</h3><p id="res-cal"></p><p id="res-tip"></p></div>
+      <div class="row"><button class="btn" id="again" type="button">New shift</button></div>
+    </div>
+  </section>
+  <p class="sr" aria-live="polite" id="live"></p>
+</main>
+
+<script>
+// Each sector has 2 accurate and 2 altered bulletins; a shift draws 1 of each per sector.
+const BANK = [
+ { s: "Media", t: true, text: "In May 2025, a summer reading list printed in the Chicago Sun-Times recommended 15 books. Only 5 of them were real.", fact: "Accurate. The list was partly generated with AI by a freelance writer and distributed through King Features. Ten of the 15 titles didn't exist.", src: "NPR, May 20, 2025" },
+ { s: "Media", t: true, text: "In the Reuters Institute's 2026 survey, 17% of 18–24-year-olds said they use AI chatbots for news every week, compared with 5% of people 55 and older.", fact: "Accurate. Across all ages, weekly use of AI chatbots for news rose from 7% in 2025 to 10% in 2026.", src: "Reuters Institute, Digital News Report 2026" },
+ { s: "Media", t: false, text: "The Chicago Sun-Times reading list was written by one of the paper's own staff reporters using AI.", fact: "Altered. The list had no byline. A freelance writer, Marco Buscaglia, said he used AI to help write it, and it reached the paper through the syndicator King Features.", src: "NPR, May 20, 2025" },
+ { s: "Media", t: false, text: "The Reuters Institute found that people trust news from AI chatbots more than news in general: 37% versus 20%.", fact: "Altered. It's the other way around: 20% trust news from AI chatbots, while 37% trust news in general.", src: "Reuters Institute, Digital News Report 2026" },
+ { s: "Business", t: true, text: "In February 2024, a Canadian tribunal ordered Air Canada to pay a customer $812.02 after its chatbot described a bereavement refund policy that didn't match the airline's real rules.", fact: "Accurate. The B.C. Civil Resolution Tribunal awarded Jake Moffatt $650.88 in damages plus interest and fees.", src: "Daily Hive, February 2024" },
+ { s: "Business", t: true, text: "Klarna said in 2024 that its AI assistant did the work of 700 customer service agents. In 2025, its CEO said the push had gone too far, and the company began hiring human agents again.", fact: "Accurate. The CEO said cost had become too dominant a factor and quality suffered.", src: "Maginative, May 2025" },
+ { s: "Business", t: false, text: "Air Canada won its chatbot case by arguing that the chatbot was responsible for its own actions.", fact: "Altered. Air Canada did make that argument, and the tribunal rejected it. A company is responsible for all the information on its website, including what its chatbot says.", src: "Daily Hive; CTV News, February 2024" },
+ { s: "Business", t: false, text: "McKinsey's 2025 survey found that 88% of organizations get a major profit boost from AI.", fact: "Altered. 88% use AI in at least one business function. Only 39% report any profit (EBIT) impact at all, and most of those say it's under 5%.", src: "McKinsey, The State of AI in 2025" },
+ { s: "Education", t: true, text: "A 2023 Stanford study found that seven AI detectors flagged essays written by non-native English speakers as AI-generated 61% of the time on average.", fact: "Accurate. The study tested 91 TOEFL essays; 89 were flagged by at least one detector. A 2026 study of newer detectors found less bias, which is why schools should test their own tools.", src: "Liang et al., Patterns, 2023" },
+ { s: "Education", t: true, text: "A Pew survey released in February 2026 found that 54% of U.S. teens have used AI chatbots to help with schoolwork.", fact: "Accurate. About 10% said they do all or most of their schoolwork with chatbot help.", src: "Pew Research Center, February 24, 2026" },
+ { s: "Education", t: false, text: "In 2023, a Texas A&M–Commerce instructor used Turnitin's AI detector to flag his entire class for cheating.", fact: "Altered. He pasted the essays into ChatGPT and asked whether it had written them. ChatGPT is not a detector and can't know who wrote a text.", src: "The Register, May 2023" },
+ { s: "Education", t: false, text: "Khan Academy's AI tutor, Khanmigo, is free for every student in the United States.", fact: "Altered. Khanmigo's teacher tools are free. Learners and parents need a paid subscription, or access through a school district.", src: "khanmigo.ai, 2026" },
+ { s: "Government", t: true, text: "U.S. federal agencies reported 3,611 AI use cases for 2025, more than double the 1,757 reported the year before.", fact: "Accurate. 445 of them were labeled high-impact; the Department of Veterans Affairs reported the most, 215.", src: "Nextgov/FCW, April 2026" },
+ { s: "Government", t: true, text: "Australia's automated Robodebt scheme ended in a A$1.8 billion settlement approved in 2021.", fact: "Accurate. About 470,000 debts were wrongly issued before the scheme was scrapped in 2020.", src: "SBS News" },
+ { s: "Government", t: false, text: "New York City fixed its MyCity business chatbot, and it is still answering business owners' questions in 2026.", fact: "Altered. After reporters showed it gave illegal advice, the city took it down on February 4, 2026. The new mayor called it \"functionally unusable.\"", src: "The Markup, January 2026" },
+ { s: "Government", t: false, text: "Michigan's MiDAS unemployment system was right about 85% of the time when it flagged fraud with no human review.", fact: "Altered. It was wrong about 85% of the time in those fully automated cases. About 37,000 people later had their fraud findings reversed.", src: "GovTech, 2017" },
+];
+const SECTORS = ["Media", "Business", "Education", "Government"];
+const KEY = "wire-check-best-v1";
+const $ = (id) => document.getElementById(id);
+let deck = [], i = 0, pts = 0, filed = false, stats = {}, stakeRight = [], stakeWrong = [];
+
+function shuffle(a) { a = a.slice(); for (let k = a.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [a[k], a[j]] = [a[j], a[k]]; } return a; }
+function readBest() { try { const v = localStorage.getItem(KEY); return v === null ? null : Number(v); } catch (e) { return null; } }
+function writeBest(v) { try { localStorage.setItem(KEY, String(v)); } catch (e) {} }
+function say(t) { $("live").textContent = ""; setTimeout(() => { $("live").textContent = t; }, 30); }
+function show(id) { ["start", "round", "results"].forEach((s) => ($(s).hidden = s !== id)); }
+const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
+
+function newGame() {
+  deck = shuffle(SECTORS.flatMap((s) => [shuffle(BANK.filter((b) => b.s === s && b.t))[0], shuffle(BANK.filter((b) => b.s === s && !b.t))[0]]));
+  i = 0; pts = 0; stats = Object.fromEntries(SECTORS.map((s) => [s, { right: 0, n: 0, pts: 0 }])); stakeRight = []; stakeWrong = [];
+  render();
+}
+function render() {
+  const b = deck[i]; filed = false;
+  show("round");
+  $("r-count").textContent = `Bulletin ${i + 1} of ${deck.length}`;
+  $("r-score").textContent = `Points ${pts}`;
+  $("t-round").textContent = `Bulletin ${i + 1}: ${b.s}`;
+  $("r-dateline").textContent = `${b.s.toUpperCase()} DESK —`;
+  $("r-text").textContent = b.text;
+  $("form").reset(); $("c2").checked = true;
+  $("form").querySelectorAll("input").forEach((x) => (x.disabled = false));
+  $("file").disabled = false; $("need").textContent = "Choose Accurate or Altered first.";
+  $("fb").hidden = true;
+  $("t-round").focus();
+}
+function file() {
+  if (filed) return;
+  const v = $("form").querySelector('input[name="v"]:checked');
+  if (!v) { $("need").textContent = "Choose Accurate or Altered before you file."; say("Choose Accurate or Altered before you file."); $("v-acc").focus(); return; }
+  filed = true;
+  const b = deck[i], stake = Number($("form").querySelector('input[name="c"]:checked').value);
+  const ok = (v.value === "true") === b.t;
+  const delta = ok ? stake : -stake; pts += delta;
+  const st = stats[b.s]; st.n++; st.pts += delta; if (ok) st.right++;
+  (ok ? stakeRight : stakeWrong).push(stake);
+  $("form").querySelectorAll("input").forEach((x) => (x.disabled = true));
+  $("file").disabled = true; $("need").textContent = "";
+  const fb = $("fb"); fb.className = "slip " + (ok ? "ok" : "no");
+  $("fb-stamp").textContent = b.t ? "Accurate" : "Altered";
+  $("t-fb").textContent = (ok ? "✓ Correct" : "✗ Incorrect") + `, ${delta > 0 ? "+" : "−"}${Math.abs(delta)} point${Math.abs(delta) === 1 ? "" : "s"}`;
+  $("fb-fact").textContent = b.fact;
+  $("fb-src").textContent = "Source: " + b.src;
+  $("r-score").textContent = `Points ${pts}`;
+  $("next").textContent = i === deck.length - 1 ? "See your desk report" : "Next bulletin";
+  fb.hidden = false;
+  say(`${$("t-fb").textContent}. This bulletin was ${b.t ? "accurate" : "altered"}. Total ${pts} points.`);
+  $("t-fb").focus();
+}
+function next() { if (!filed) return; i++; if (i < deck.length) render(); else finish(); }
+function finish() {
+  show("results");
+  const prev = readBest(); const best = prev === null ? pts : Math.max(prev, pts); writeBest(best);
+  $("res-score").textContent = String(pts);
+  $("res-best").textContent = `Best on this device: ${best}`;
+  $("res-rows").innerHTML = SECTORS.map((s) => `<tr><th scope="row">${s}</th><td>${stats[s].right} of ${stats[s].n}</td><td>${stats[s].pts > 0 ? "+" : ""}${stats[s].pts}</td></tr>`).join("");
+  const r = avg(stakeRight), w = avg(stakeWrong);
+  let cal;
+  if (!stakeWrong.length) cal = `Every verdict was right, with an average stake of ${r.toFixed(1)}. ${r < 2.5 ? "You could have trusted yourself more." : "Confident and correct."}`;
+  else if (!stakeRight.length) cal = "No verdicts were right this shift. Slow down and look for the one detail that could have been changed.";
+  else if (w >= r) cal = `You staked about as much when you were wrong (${w.toFixed(1)}) as when you were right (${r.toFixed(1)}). Well-calibrated checkers bet less when they're unsure.`;
+  else cal = `You staked more when you were right (${r.toFixed(1)}) than when you were wrong (${w.toFixed(1)}). That's good calibration: your confidence tracked your accuracy.`;
+  $("res-cal").textContent = cal;
+  const weakest = SECTORS.slice().sort((a, b) => stats[a].pts - stats[b].pts)[0];
+  $("res-tip").textContent = stats[weakest].right === stats[weakest].n
+    ? "Every sector was clean. Play again: each shift draws different bulletins."
+    : `Weakest desk: ${weakest}. Altered bulletins usually change one checkable detail: a number flipped, a tool swapped, or an outcome reversed. Before you stake 3, ask which detail you could actually verify.`;
+  say(`Shift over. ${pts} points out of 24.`);
+  $("t-res").focus();
+}
+$("go").addEventListener("click", newGame);
+$("again").addEventListener("click", newGame);
+$("form").addEventListener("submit", (e) => { e.preventDefault(); file(); });
+$("next").addEventListener("click", next);
+document.addEventListener("keydown", (e) => {
+  const tag = e.target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (tag === "BUTTON" && (e.key === "Enter" || e.key === " ")) return;
+  if ($("round").hidden) return;
+  const k = e.key.toLowerCase();
+  if (!filed) {
+    if (k === "a") { $("v-acc").checked = true; e.preventDefault(); }
+    else if (k === "l") { $("v-alt").checked = true; e.preventDefault(); }
+    else if (/^[1-3]$/.test(k)) { $("c" + k).checked = true; e.preventDefault(); }
+    else if (k === "enter") { file(); e.preventDefault(); }
+  } else if (k === "n") { next(); e.preventDefault(); }
+});
+const b0 = readBest(); $("best-start").textContent = b0 !== null ? `Best on this device: ${b0} points` : "";
+</script>
+</body>
+</html>
